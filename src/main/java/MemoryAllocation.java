@@ -5,6 +5,8 @@ public class MemoryAllocation
     String owner;  //which process owns this memory
     long pos;      //where does it start
     long len;      //how long is the memory
+    MemoryAllocation next;
+    MemoryAllocation prev;
 
 
 
@@ -18,8 +20,11 @@ public class MemoryAllocation
 	this.owner = owner;
 	this.pos = pos;
 	this.len=len;
+	this.next = null;
+	this.prev = null;
     }
-
+    
+    
 
     public String getOwner()
     {

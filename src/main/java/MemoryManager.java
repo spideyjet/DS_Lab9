@@ -11,7 +11,7 @@ public class MemoryManager
      */
    public MemoryManager(long size)
    {
-	   MemoryManager Free = new MemoryManager(100);
+	   head = new MemoryAllocation(Free, 0, size);
    }
 
 
@@ -30,34 +30,59 @@ public class MemoryManager
       {
     	  if(curr.getOwner().equals(Free) && curr.getLength() >= size)
     	  {
-    		  long remainingSize = curr.getLength() - size;
-    		  curr.owner = requester;
-    		  curr.len = size;
-    		  
-    		  if(remainingSize > 0)
-    		  {
-    			  MemoryAllocation newFreeBlock = new MemoryAllocation(Free, curr.pos);
-    			  newFreeBlock.next = curr.next;
-    			  
-    			  if(curr.next != null)
+    		  if(curr.getLength() > size)
     			  {
-    				  curr.next.prev = newFreeBlock;
-    			  }
-    			  curr.next = newFreeBlock;
-    			  newFreeBlock.prev = curr;
-    		  }
-    		  return curr;
+    			  MemoryAllocation allocated = new MemoryAllocation(requester, curr.getPosition(), size);
+    			  MemoryAllocation remainingFree = new MemoryAllocation(Free, curr.getPosition() + size, curr.getLength() - size);
     			  
+    			  allocated.next = remainingFree;
+    			  remainingFree.prev = allocated;
+    			  
+    			  if(curr.prev != null)
+    			  {
+    				  curr.prev.next = allocated;
+    				  allocated.prev = curr.prev;
+    			  }
+    				  else
+    				  {
+    					  head = allocated;
+    				  }
+    			  remainingFree.next = curr.next;
+    			  if (curr.next != null)
+    			  {
+    				  curr.next.prev = remainingFree;
+    			  }
+    			  return allocated;
+    			  }
+    		  else
+    		  {
+    			 MemoryAllocation allocated = new MemoryAllocation(requester, curr.getPosition(), size);
+    			 
+    			 if(curr.prev != null)
+    			 {
+    				 curr.prev.next = allocated;
+    			 }
+    			 else
+    			 {
+    				 head = allocated;
+    			 }
+    			 allocated.prev = curr.prev;
+    			 
+    			 if(curr.next != null)
+    			 {
+    				 curr.next.prev = allocated;
+    			 }
+    			 allocated.next = curr.next;
+    			 
+    			 return allocated;
     		  }
-    	  curr = curr.next;
-    	  }
+    			  
+    		 }
+    			  curr = curr.next;
+    	 }
       return null;
-   }
-    		 
-    		  
-    		 
-      
-   
+      }
+    	
 
 
     
@@ -68,28 +93,54 @@ public class MemoryManager
      */
    public void returnMemory(MemoryAllocation mem)
    {
-	   mem.owner = Free;
+	   MemoryAllocation freeMem = new MemoryAllocation(Free, mem.getPosition(), mem.getLength());
 	   
-	   if(mem.prev != null && mem.prev.getOwner().equals(Free))
+	   freeMem.prev = mem.prev;
+	   freeMem.next = mem.next;
+	   
+	   if(mem.prev != null)
 	   {
-		   mem.prev.len += mem.len;
-		   mem.prev.next = mem.next;
-		   
-		   if(mem.next != null)
-		   {
-			   mem.next.prev = mem.prev;
-		   }
-		   mem = mem.prev;
+		   mem.prev.next = freeMem;
+	   }
+	   else
+	   {
+		   head = freeMem;
 	   }
 	   
-	   if(mem.next != null && mem.next.getOwner().equals(Free))
+	   if(mem.next != null)
 	   {
-		   mem.len += mem.next.len;
-		   mem.next = mem.next.next;
+		   mem.next.prev = freeMem;
+	   }
+	   
+	   if(freeMem.prev != null && freeMem.prev.getOwner().equals(Free))
+	   {
+		   freeMem = new MemoryAllocation(Free, freeMem.prev.getPosition(), freeMem.prev.getLength() + freeMem.getLength());
+		   freeMem.prev = freeMem.prev.prev;
+		   
+		   if (freeMem.prev != null)
+		   {
+			   freeMem.prev.next = freeMem;
+		   }
+		   else
+		   {
+			   head = freeMem;
+		   }
+		   freeMem.next = mem.next;
 		   
 		   if(mem.next != null)
 		   {
-			   mem.next.prev = mem;
+			   mem.next.prev = freeMem;
+		   }
+		   
+		   if(freeMem.next != null && freeMem.next.getOwner().equals(Free))
+		   {
+			   freeMem = new MemoryAllocation(Free, freeMem.getPosition(), freeMem.getLength() + freeMem.next.getLength());
+			   freeMem.next = freeMem.next.next;
+			   
+			   if(freeMem.next != null)
+			   {
+				   freeMem.next.prev = freeMem;
+			   }
 		   }
 	   }
    }

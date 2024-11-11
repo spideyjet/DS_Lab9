@@ -11,7 +11,7 @@ public class MemoryManager
      */
    public MemoryManager(long size)
    {
-   
+	   MemoryManager Free = new MemoryManager(100);
    }
 
 
@@ -24,8 +24,40 @@ public class MemoryManager
     
    public MemoryAllocation requestMemory(long size,String requester)
    {
+      MemoryAllocation curr = head;
+      
+      while(curr!= null);
+      {
+    	  if(curr.getOwner().equals(Free) && curr.getLength() >= size)
+    	  {
+    		  long remainingSize = curr.getLength() - size;
+    		  curr.owner = requester;
+    		  curr.len = size;
+    		  
+    		  if(remainingSize > 0)
+    		  {
+    			  MemoryAllocation newFreeBlock = new MemoryAllocation(Free, curr.pos);
+    			  newFreeBlock.next = curr.next;
+    			  
+    			  if(curr.next != null)
+    			  {
+    				  curr.next.prev = newFreeBlock;
+    			  }
+    			  curr.next = newFreeBlock;
+    			  newFreeBlock.prev = curr;
+    		  }
+    		  return curr;
+    			  
+    		  }
+    	  curr = curr.next;
+    	  }
       return null;
    }
+    		 
+    		  
+    		 
+      
+   
 
 
     
@@ -36,6 +68,30 @@ public class MemoryManager
      */
    public void returnMemory(MemoryAllocation mem)
    {
+	   mem.owner = Free;
+	   
+	   if(mem.prev != null && mem.prev.getOwner().equals(Free))
+	   {
+		   mem.prev.len += mem.len;
+		   mem.prev.next = mem.next;
+		   
+		   if(mem.next != null)
+		   {
+			   mem.next.prev = mem.prev;
+		   }
+		   mem = mem.prev;
+	   }
+	   
+	   if(mem.next != null && mem.next.getOwner().equals(Free))
+	   {
+		   mem.len += mem.next.len;
+		   mem.next = mem.next.next;
+		   
+		   if(mem.next != null)
+		   {
+			   mem.next.prev = mem;
+		   }
+	   }
    }
     
 

@@ -26,7 +26,7 @@ public class MemoryManager
    {
       MemoryAllocation curr = head;
       
-      while(curr!= null);
+      while(curr!= null)
       {
     	  if(curr.getOwner().equals(Free) && curr.getLength() >= size)
     	  {
@@ -112,38 +112,39 @@ public class MemoryManager
 		   mem.next.prev = freeMem;
 	   }
 	   
-	   if(freeMem.prev != null && freeMem.prev.getOwner().equals(Free))
-	   {
-		   freeMem = new MemoryAllocation(Free, freeMem.prev.getPosition(), freeMem.prev.getLength() + freeMem.getLength());
-		   freeMem.prev = freeMem.prev.prev;
-		   
-		   if (freeMem.prev != null)
-		   {
-			   freeMem.prev.next = freeMem;
-		   }
-		   else
-		   {
-			   head = freeMem;
-		   }
-		   freeMem.next = mem.next;
-		   
-		   if(mem.next != null)
-		   {
-			   mem.next.prev = freeMem;
-		   }
-		   
-		   if(freeMem.next != null && freeMem.next.getOwner().equals(Free))
-		   {
-			   freeMem = new MemoryAllocation(Free, freeMem.getPosition(), freeMem.getLength() + freeMem.next.getLength());
-			   freeMem.next = freeMem.next.next;
-			   
-			   if(freeMem.next != null)
-			   {
-				   freeMem.next.prev = freeMem;
-			   }
-		   }
-	   }
+	   recursiveMergeAdjacent(freeMem);
    }
+
+
+	private void recursiveMergeAdjacent(MemoryAllocation freeMem) 
+	{
+		if (freeMem.prev != null && freeMem.prev.getOwner().equals(Free))
+			{
+			freeMem = new MemoryAllocation(Free, freeMem.prev.getPosition(), freeMem.prev.getLength() + freeMem.getLength());
+			
+			freeMem.prev = freeMem.prev.prev;
+			
+			if (freeMem.prev != null)
+			{
+				freeMem.next.prev = freeMem;
+			}
+			else
+			{
+				head = freeMem;
+			}
+			
+			if(freeMem.next != null)
+			{
+				freeMem.next.prev = freeMem;
+			}
+			}
+			if ((freeMem.prev != null && freeMem.prev.getOwner().equals(Free))
+					|| (freeMem.next != null && freeMem.next.getOwner().equals(Free)))
+			{
+				recursiveMergeAdjacent(freeMem);
+			}
+		
+	}
     
 
 

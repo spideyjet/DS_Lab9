@@ -89,6 +89,28 @@ class MemoryManagerTest {
 		assertEquals(90, Aden.getLength());
 		assertEquals(10,Aden.getPosition());
 		
+		
+		
 	}
+	
+	@Test
+	public void MoreMemoryManagerTesting()
+	{
+		MemoryManager B = new MemoryManager(100);
+		
+		MemoryAllocation Brad  = B.requestMemory(25, "Brad");
+		MemoryAllocation Jake  = B.requestMemory(40, "Jake");
+		MemoryAllocation Susan  = B.requestMemory(35, "Susan");
+		
+		B.returnMemory(Brad);
+		B.returnMemory(Susan);
+		B.returnMemory(Jake);
+		
+		MemoryAllocation Austin = B.requestMemory(100, "Austin");
+		assertEquals("Austin", Austin.getOwner());
+		assertEquals(100, Austin.getLength());
+		assertEquals(0, Austin.getPosition());
+	}
+	
 
 }

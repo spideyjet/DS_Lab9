@@ -112,41 +112,58 @@ public class MemoryManager
 		   mem.next.prev = freeMem;
 	   }
 	   
-	   recursiveMergeAdjacent(freeMem);
+	   if(freeMem.prev != null && freeMem.prev.getOwner().equals(Free))
+	   {
+		   MemoryAllocation difFreeMem = new MemoryAllocation(Free, freeMem.prev.getPosition(), freeMem.prev.getLength() + freeMem.getLength());
+		   difFreeMem.prev = freeMem.prev.prev;
+		   difFreeMem.next = freeMem.next;
+		   
+		   
+		   if (difFreeMem.prev != null)
+		   {
+			   difFreeMem.prev.next = difFreeMem;
+		   }
+		   else
+		   {
+			   head = difFreeMem;
+		   }
+		   difFreeMem.next = mem.next;
+		   
+		   if(mem.next != null)
+		   {
+			   mem.next.prev = difFreeMem;
+		   }
+		   
+		   freeMem = difFreeMem;
+	   }
+		   
+		   if(freeMem.next != null && freeMem.next.getOwner().equals(Free))
+		   {
+			   MemoryAllocation morefreeMem = new MemoryAllocation(Free, freeMem.getPosition(), freeMem.getLength() + freeMem.next.getLength());
+			   morefreeMem.next = freeMem.next.next;
+			   morefreeMem.prev = freeMem.prev;
+			   
+			   if(morefreeMem.prev != null)
+			   {
+				   morefreeMem.prev.next = morefreeMem;
+			   }
+			   else
+			   {
+				   head = morefreeMem;
+			   }
+			   
+			   if(morefreeMem.next != null)
+			   {
+				   morefreeMem.next.prev = morefreeMem;
+				   
+			   }
+			   freeMem = morefreeMem;
+		   }
+		   
+	   }
    }
-
-
-	private void recursiveMergeAdjacent(MemoryAllocation freeMem) 
-	{
-		if (freeMem.prev != null && freeMem.prev.getOwner().equals(Free))
-			{
-			freeMem = new MemoryAllocation(Free, freeMem.prev.getPosition(), freeMem.prev.getLength() + freeMem.getLength());
-			
-			freeMem.prev = freeMem.prev.prev;
-			
-			if (freeMem.prev != null)
-			{
-				freeMem.next.prev = freeMem;
-			}
-			else
-			{
-				head = freeMem;
-			}
-			
-			if(freeMem.next != null)
-			{
-				freeMem.next.prev = freeMem;
-			}
-			}
-			if ((freeMem.prev != null && freeMem.prev.getOwner().equals(Free))
-					|| (freeMem.next != null && freeMem.next.getOwner().equals(Free)))
-			{
-				recursiveMergeAdjacent(freeMem);
-			}
-		
-	}
     
 
 
 
-}
+
